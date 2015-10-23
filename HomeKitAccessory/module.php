@@ -262,7 +262,17 @@ class HomeKitAccessory extends IPSModule {
 		$targetValue = $this->GetTargetValue($variableId, $homeKitVariableType, $homeKitValue);
 		
 		// request associated action for the specified variable and value
-		IPS_RequestAction($variableObject["ParentID"], $variableObject["ObjectIdent"], $targetValue);
+		//IPS_RequestAction($variableObject["ParentID"], $variableObject["ObjectIdent"], $targetValue);
+		// Problem: ObjectIdent not found -> no action
+		//Set Target Value use Action-Skript, if none existing only set Value
+		$var_data = IPS_GetVariable($variableId);
+                $action_script = $var_data['VariableCustomAction'];
+                if($action_script != ''){
+                        IPS_RunScriptEx($action_script, Array("VARIABLE" => $variableId, "VALUE" => $targetValue));
+                }
+                else{
+                        SetValue($variableId, $targetValue);
+                }
 	}
 
 	private function GetTargetValue($variableId, $homeKitVariableType, $homeKitValue) {
